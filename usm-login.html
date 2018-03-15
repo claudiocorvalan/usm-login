@@ -67,7 +67,7 @@
   <script>
     /**
      * `usm-login`
-     * Componente que implementa el login contra el servidor de autenticacion institucional
+     * Componente en Polymer 2 que implementa el login contra el servidor de autenticacion institucional
      *
      * @customElement
      * @polymer
@@ -100,15 +100,6 @@
         return [
           'changedLogin(login.username, login.password)'
         ];
-      }
-      /**
-       * Use for one-time configuration of your component after local DOM is
-       * initialized.
-       */
-      ready() {
-        super.ready();
-        /* this.$.loginForm.addEventListener('iron-form-presubmit',() => formPreSubmit());
-        this.$.loginForm.addEventListener('iron-form-response', (e) => formResponse(e)); */
       }
       
       changedLogin(username, password){
