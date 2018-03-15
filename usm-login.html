@@ -1,0 +1,174 @@
+<link rel="import" href="./bower_components/polymer/polymer-element.html">
+<link rel="import" href="./bower_components/iron-form/iron-form.html">
+<link rel="import" href="./bower_components/paper-card/paper-card.html">
+<link rel="import" href="./bower_components/paper-input/paper-input.html">
+<link rel="import" href="./bower_components/paper-button/paper-button.html">
+<link rel="import" href="./bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="./login-icons.html">
+
+<dom-module id="usm-login">
+  <template>
+    <style>
+      :host {
+        --iron-icon-width: 35px;
+        --iron-icon-height: 35px;
+        display: flex;
+        justify-content: center;
+      }
+      div.card-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+    </style>
+
+    
+    <iron-form id="loginForm"
+      on-iron-form-invalid="formInvalid"
+      on-iron-form-presubmit="formPreSubmit"
+      on-iron-form-response="formResponse"
+      on-iron-form-error="formError"
+    >
+      <form id="formulario1" name="formulario1" method="post" action="https://ssonew.usm.cl/loginusm/login/login.xhtml" class="transparente pad5" enctype="application/x-www-form-urlencoded">
+        
+        <paper-card heading="Ingreso Cuenta USM">
+          <div class="card-content">
+            <input type="hidden" name="formulario1" value="formulario1" data-original-title="" title="">
+            
+            <paper-input 
+              label="nombre.apellido" 
+              name="formulario1:username" 
+              value={{login.username}} 
+              title="Ej.: juan.perez"
+              required
+              pattern="^[a-zA-Z]+\.[a-zA-Z]+$" 
+              error-message="Formato Inválido"
+              >
+              <iron-icon icon="login-icons:perm-identity" slot="prefix"></iron-icon>
+            </paper-input>
+            
+            <paper-input label="contraseña" name="formulario1:pass" value={{login.password}} required type="password">
+              <iron-icon icon="login-icons:lock-outline" slot="prefix"></iron-icon>
+            </paper-input>
+          </div>
+
+          <div class="card-actions">
+            <paper-button raised name="formulario1:j_idt10" disabled$="[[!formValid]]" on-click="formSubmit">Enviar</paper-button>
+            <a href="https://pasaporte.usm.cl/id/" target="_parent" class="linkT">¿Olvidó su Contraseña?</a>
+          </div>
+        </paper-card>
+
+        <div id="formulario1:messages" class="ui-messages ui-widget" aria-live="polite"></div>
+      </form>
+    </iron-form>
+
+  </template>
+
+  <script>
+    /**
+     * `usm-login`
+     * Componente que implementa el login contra el servidor de autenticacion institucional
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class UsmLogin extends Polymer.Element {
+
+      static get is() { return 'usm-login'; }
+
+      static get properties() {
+        return {
+          varXml: String,
+          sistemaKey: String,
+          login: {
+            type: Object,
+            value: function(){ return { username: "", password: "" } }
+          },
+          token: {
+            type: String,
+            value: ""
+          },
+          formValid: {
+            type: Boolean,
+            value: false
+          }
+        };
+      }
+
+      static get observers() {
+        return [
+          'changedLogin(login.username, login.password)'
+        ];
+      }
+      /**
+       * Use for one-time configuration of your component after local DOM is
+       * initialized.
+       */
+      ready() {
+        super.ready();
+        /* this.$.loginForm.addEventListener('iron-form-presubmit',() => formPreSubmit());
+        this.$.loginForm.addEventListener('iron-form-response', (e) => formResponse(e)); */
+      }
+      
+      changedLogin(username, password){
+        //console.log('changedLogin', this.login)
+        if(username.length && password.length){
+          this.formValid = this.$.loginForm.validate();
+        }
+      }
+
+      formInvalid(e) {
+        console.log('FormInvalid', e);
+        this.formValid=false;
+      }
+
+      formPreSubmit(e) {
+        console.log('FormPreSubmit', this.$.loginForm.request.body);
+        this.$.loginForm.request.body['formulario1:varXML'] = this.varXml;
+        this.$.loginForm.request.body['formulario1:sistemaKey'] = this.sistemaKey;
+      }
+
+      formSubmit() {
+        console.log('form submit');
+        this.$.loginForm.submit();
+      }
+
+      formResponse(e) {
+        console.log('response', e);
+        this.token=e.detail;
+        this.dispatchEvent(new CustomEvent('usm-login-response', {
+          detail: e.detail,
+          bubbles: true,
+          composed: true
+        }));
+      }
+
+      formError(e) {
+        console.log('form error', e);
+        this.dispatchEvent(new CustomEvent('usm-login-error', {
+          detail: e.error,
+          bubbles: true,
+          composed: true
+        }));
+      }
+
+      logout() {
+        this.token="";
+      }
+
+      /**
+       * Evento desencadenado al ocurrir el login exitoso, que trae el token de autenticacion
+       *  @event usm-login-response
+       */
+      
+      /**
+       * Evento desencadenado al ocurrir un error en el proceso de login, expone el o los errorres recibidos
+       *  @event usm-login-response
+       */
+
+    }
+
+    window.customElements.define(UsmLogin.is, UsmLogin);
+  </script>
+</dom-module>
