@@ -24,10 +24,10 @@
 
     
     <iron-form id="loginForm"
-      on-iron-form-invalid="formInvalid"
-      on-iron-form-presubmit="formPreSubmit"
-      on-iron-form-response="formResponse"
-      on-iron-form-error="formError"
+      on-iron-form-invalid="_formInvalid"
+      on-iron-form-presubmit="_formPreSubmit"
+      on-iron-form-response="_formResponse"
+      on-iron-form-error="_formError"
     >
       <form id="formulario1" name="formulario1" method="post" action="https://ssonew.usm.cl/loginusm/login/login.xhtml" class="transparente pad5" enctype="application/x-www-form-urlencoded">
         
@@ -38,7 +38,7 @@
             <paper-input 
               label="nombre.apellido" 
               name="formulario1:username" 
-              value={{login.username}} 
+              value={{_login.username}} 
               title="Ej.: juan.perez"
               required
               pattern="^[a-zA-Z]+\.[a-zA-Z]+$" 
@@ -47,13 +47,13 @@
               <iron-icon icon="login-icons:perm-identity" slot="prefix"></iron-icon>
             </paper-input>
             
-            <paper-input label="contraseña" name="formulario1:pass" value={{login.password}} required type="password">
+            <paper-input label="contraseña" name="formulario1:pass" value={{_login.password}} required type="password">
               <iron-icon icon="login-icons:lock-outline" slot="prefix"></iron-icon>
             </paper-input>
           </div>
 
           <div class="card-actions">
-            <paper-button raised name="formulario1:j_idt10" disabled$="[[!formValid]]" on-click="formSubmit">Enviar</paper-button>
+            <paper-button raised name="formulario1:j_idt10" disabled$="[[!_formValid]]" on-click="formSubmit">Enviar</paper-button>
             <a href="https://pasaporte.usm.cl/id/" target="_parent" class="linkT">¿Olvidó su Contraseña?</a>
           </div>
         </paper-card>
@@ -69,6 +69,14 @@
      * `usm-login`
      * Componente en Polymer 2 que implementa el login contra el servidor de autenticacion institucional
      *
+     * `<usm-login>`
+     *
+     * ```html
+     * <usm-login
+     *   sistema-key="[SISTEMA_ID]"
+     *   var-xml="[CADENA_XML_ENCRIPTADA]"
+     * ></usm-login>
+     * ```
      * @customElement
      * @polymer
      * @demo demo/index.html
@@ -79,17 +87,44 @@
 
       static get properties() {
         return {
+          /**
+          * String con las etiquetas del XML encriptadas a enviar.
+          * @type {String}
+          */
           varXml: String,
+
+          /**
+          * El código del sistema entregado por la DTI.
+          * @type {String}
+          */
           sistemaKey: String,
-          login: {
-            type: Object,
-            value: function(){ return { username: "", password: "" } }
-          },
+
+          /**
+          * String con el token devuelto por el sistema de login institucional.
+          * @type {String}
+          */
           token: {
             type: String,
-            value: ""
+            value: "",
+            notify: true
           },
-          formValid: {
+
+          /**
+          * Objeto que contiene la información ingresada por el usuario (username y password) en el formulario de login.
+          * @type {Object}
+          * @private
+          */
+          _login: {
+            type: Object,
+            value: function () { return { username: "", password: "" } }
+          },
+
+          /**
+          *  Flag para manejar el estado del boton enviar del formulario de login.
+          * @type {Boolean}
+          * @private
+          */
+          _formValid: {
             type: Boolean,
             value: false
           }
@@ -98,34 +133,34 @@
 
       static get observers() {
         return [
-          'changedLogin(login.username, login.password)'
+          '_changedLogin(login.username, login.password)'
         ];
       }
       
-      changedLogin(username, password){
-        //console.log('changedLogin', this.login)
+      _changedLogin(username, password){
+        console.log('changedLogin', this._login)
         if(username.length && password.length){
-          this.formValid = this.$.loginForm.validate();
+          this._formValid = this.$.loginForm.validate();
         }
       }
 
-      formInvalid(e) {
+      _formInvalid(e) {
         console.log('FormInvalid', e);
-        this.formValid=false;
+        this._formValid=false;
       }
 
-      formPreSubmit(e) {
+      _formPreSubmit(e) {
         console.log('FormPreSubmit', this.$.loginForm.request.body);
         this.$.loginForm.request.body['formulario1:varXML'] = this.varXml;
         this.$.loginForm.request.body['formulario1:sistemaKey'] = this.sistemaKey;
       }
 
       formSubmit() {
-        console.log('form submit');
+        console.log('formSubmit');
         this.$.loginForm.submit();
       }
 
-      formResponse(e) {
+      _formResponse(e) {
         console.log('response', e);
         this.token=e.detail;
         this.dispatchEvent(new CustomEvent('usm-login-response', {
@@ -135,7 +170,7 @@
         }));
       }
 
-      formError(e) {
+      _formError(e) {
         console.log('form error', e);
         this.dispatchEvent(new CustomEvent('usm-login-error', {
           detail: e.error,
@@ -155,7 +190,7 @@
       
       /**
        * Evento desencadenado al ocurrir un error en el proceso de login, expone el o los errorres recibidos
-       *  @event usm-login-response
+       *  @event usm-login-error
        */
 
     }
