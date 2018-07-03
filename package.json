@@ -1,0 +1,24 @@
+{
+  "name": "usm-login",
+  "description": "Componente que implementa el login contra el servidor de autenticacion institucional",
+  "main": "usm-login.js",
+  "version": "0.0.1",
+  "dependencies": {
+    "@material/card": "^0.36.1",
+    "@material/mwc-button": "^0.1.2",
+    "@material/mwc-formfield": "^0.1.2",
+    "@polymer/iron-form": "^3.0.0-pre.19",
+    "@polymer/iron-icon": "^3.0.0-pre.21",
+    "@polymer/iron-iconset-svg": "^3.0.0-pre.21",
+    "@polymer/lit-element": "^0.5.2",
+    "@polymer/paper-card": "^3.0.0-pre.19",
+    "@polymer/paper-input": "^3.0.0-pre.19",
+    "@polymer/polymer": "^3.0.0"
+  },
+  "devDependencies": {
+    "@polymer/iron-demo-helpers": "^3.0.0-pre.19",
+    "@webcomponents/webcomponentsjs": "^2.0.0",
+    "wct-browser-legacy": "^1.0.0"
+  },
+  "license": "MIT"
+}
